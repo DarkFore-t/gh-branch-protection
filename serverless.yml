@@ -1,0 +1,39 @@
+service: gh-branch-protection
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: "prod"
+  region: "ap-south-1"
+  timeout: 10
+  memorySize: 128
+  versionFunctions: false
+  stackTags:
+    "Project": "GitHub Branch Protection"
+  deploymentBucket:
+    name: ${opt:deployment-bucket}
+  deploymentprefix: "gh-branch-protection"
+  environment:
+    GITHUB_KEY: ${opt:github-key}
+
+package:
+  exclude:
+    - .gitignore
+    - package.json
+    - requirements.txt
+    - README.md
+    - serverless.yml
+  excludeDevDependencies: true
+  individually: true
+
+plugins:
+  - serverless-python-requirements
+
+functions:
+  hello:
+    handler: protect.lambda_handler
+    reservedConcurrency: 1
+    events:
+      - http:
+          path: /
+          method: post
